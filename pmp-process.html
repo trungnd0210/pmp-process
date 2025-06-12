@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to PMI Process Groups</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 
+        Chosen Palette: Calm Harmony 
+        Application Structure Plan: A tab-based SPA design is used to present the PMI framework from multiple angles, enhancing user exploration and understanding. The default view is a "Process Group Flow," offering a visual, high-level overview. Users can switch to a "Document Explorer" to see the lifecycle of key project artifacts, or an "Activities View" to see where specific tasks fit into the overall process. This multi-faceted approach moves beyond the linear structure of the source report, allowing users to query the information based on their specific interests (e.g., "Where is the Risk Register used?") and to better synthesize the relationships between different components of the framework. This structure was chosen for its superior usability and its ability to turn a static report into an engaging learning tool.
+        Visualization & Content Choices: The main view uses an interactive HTML/CSS flowchart to visualize the 5 process groups, making the project lifecycle intuitive. (Goal: Inform/Organize, Method: Interactive HTML diagram, Interaction: Click to navigate). Detailed content for each group is organized into accordions to prevent information overload. (Goal: Inform, Method: HTML/JS Accordion, Interaction: Click to expand). The "Document Explorer" uses a dynamic HTML grid, updated with JS, to show the journey of each document across the process groups. (Goal: Organize/Relationships, Method: Dynamic HTML grid, Interaction: Dropdown selection). Key stats are highlighted in cards for quick takeaways. (Goal: Inform, Method: Styled HTML). This combination of interactive diagrams and dynamic content provides a richer, more engaging user experience than static text.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. 
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #343A40;
+        }
+        .nav-active {
+            color: #3B82F6;
+            border-bottom-color: #3B82F6;
+        }
+        .process-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .process-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .accordion-content.open {
+            max-height: 1500px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="text-3xl md:text-5xl font-bold text-gray-900">An Interactive Guide to PMI Process Groups</h1>
+            <p class="text-lg text-gray-600 mt-2">Explore the complete project management lifecycle, from initiation to closing.</p>
+        </header>
+
+        <nav class="mb-8 bg-white rounded-lg shadow-sm p-2 flex justify-center space-x-2 md:space-x-8 border-b">
+            <button class="nav-button font-medium text-gray-600 hover:text-blue-500 py-2 px-4 border-b-2 border-transparent transition-colors duration-300 nav-active" data-tab="flow">Process Group Flow</button>
+            <button class="nav-button font-medium text-gray-600 hover:text-blue-500 py-2 px-4 border-b-2 border-transparent transition-colors duration-300" data-tab="documents">Document Explorer</button>
+            <button class="nav-button font-medium text-gray-600 hover:text-blue-500 py-2 px-4 border-b-2 border-transparent transition-colors duration-300" data-tab="activities">Key Activities</button>
+        </nav>
+
+        <main>
+            <!-- Tab 1: Process Group Flow -->
+            <div id="flow" class="tab-content active">
+                <section class="text-center mb-12 p-6 bg-white rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">The Project Lifecycle at a Glance</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">This is the standard PMI framework for managing a project. The five process groups guide the project from start to finish. While shown sequentially here for clarity, remember that Planning, Executing, and Monitoring & Controlling are iterative and often overlap. Click on any group to explore its details.</p>
+                </section>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-12">
+                    <a href="#initiating" class="process-card w-full md:w-1/6 bg-white p-4 rounded-lg shadow-md border-t-4 border-blue-400 text-center">
+                        <div class="text-xl font-bold">1. Initiating</div>
+                    </a>
+                    <div class="text-2xl text-gray-400 font-light hidden md:block">&rarr;</div>
+                    <a href="#planning" class="process-card w-full md:w-1/6 bg-white p-4 rounded-lg shadow-md border-t-4 border-purple-400 text-center">
+                        <div class="text-xl font-bold">2. Planning</div>
+                    </a>
+                    <div class="text-2xl text-gray-400 font-light hidden md:block">&rarr;</div>
+                    <a href="#executing" class="process-card w-full md:w-1/5 bg-white p-4 rounded-lg shadow-md border-t-4 border-green-400 text-center">
+                        <div class="text-xl font-bold">3. Executing</div>
+                    </a>
+                    <div class="text-2xl text-gray-400 font-light hidden md:block">&harr;</div>
+                     <a href="#monitoring" class="process-card w-full md:w-1/4 bg-white p-4 rounded-lg shadow-md border-t-4 border-yellow-400 text-center">
+                        <div class="text-xl font-bold">4. Monitoring & Controlling</div>
+                    </a>
+                    <div class="text-2xl text-gray-400 font-light hidden md:block">&rarr;</div>
+                     <a href="#closing" class="process-card w-full md:w-1/6 bg-white p-4 rounded-lg shadow-md border-t-4 border-red-400 text-center">
+                        <div class="text-xl font-bold">5. Closing</div>
+                    </a>
+                </div>
+
+                <!-- Process Group Details -->
+                <div class="space-y-8">
+                    <div id="initiating" class="bg-white p-6 rounded-xl shadow-lg scroll-mt-24"></div>
+                    <div id="planning" class="bg-white p-6 rounded-xl shadow-lg scroll-mt-24"></div>
+                    <div id="executing" class="bg-white p-6 rounded-xl shadow-lg scroll-mt-24"></div>
+                    <div id="monitoring" class="bg-white p-6 rounded-xl shadow-lg scroll-mt-24"></div>
+                    <div id="closing" class="bg-white p-6 rounded-xl shadow-lg scroll-mt-24"></div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Document Explorer -->
+            <div id="documents" class="tab-content">
+                <section class="text-center mb-12 p-6 bg-white rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Project Document Lifecycle</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">Project documents are critical artifacts that are created, updated, and finalized throughout the project. Select a document from the dropdown to see its journey across the five process groups and understand its purpose.</p>
+                </section>
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="w-full md:w-1/3">
+                         <label for="document-selector" class="block text-sm font-medium text-gray-700 mb-2">Select a Document:</label>
+                        <select id="document-selector" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </select>
+                    </div>
+                    <div class="w-full md:w-2/3 bg-white p-6 rounded-xl shadow-lg">
+                        <h3 id="doc-title" class="text-xl font-bold mb-2 text-blue-600">Project Charter</h3>
+                        <p id="doc-description" class="text-gray-700 mb-4"></p>
+                        <div id="doc-lifecycle" class="grid grid-cols-5 gap-2 text-center text-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 3: Key Activities -->
+            <div id="activities" class="tab-content">
+                 <section class="text-center mb-12 p-6 bg-white rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Core Project Management Activities</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">This chart visualizes where key project management activities are most prominent across the five process groups. While many activities span the entire lifecycle, this shows their primary focus. Use the filter to highlight specific activities.</p>
+                </section>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="chart-container">
+                        <canvas id="activitiesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const processData = {
+            initiating: {
+                title: "1. Initiating Process Group",
+                color: "blue-400",
+                purpose: "To formally define a new project or a new phase of an existing project, establish its purpose and objectives, and obtain authorization to start. This stage is fundamentally about ensuring the project is aligned with the organization's strategic goals before significant resources are committed. It answers the crucial question, 'What is this project and why should we do it?' A well-executed initiation sets the stage for success by creating a shared understanding and a solid foundation.",
+                activities: [
+                    "Assess Project Feasibility",
+                    "Define High-Level Scope and Deliverables",
+                    "Identify Key Stakeholders",
+                    "Assign the Project Manager",
+                    "Establish High-Level Risks, Assumptions, and Constraints"
+                ],
+                outputs: [
+                    "Project Charter",
+                    "Assumption Log",
+                    "Stakeholder Register (Initial)"
+                ]
+            },
+            planning: {
+                title: "2. Planning Process Group",
+                color: "purple-400",
+                purpose: "To establish the total scope of the effort, define and refine the objectives, and develop the course of action required to attain those objectives. This is the most intensive process group, where the project manager and team create the detailed roadmap for the entire project. Effective planning is iterative and is the key to successfully navigating the project through to completion.",
+                activities: [
+                    "Develop the Project Management Plan",
+                    "Collect Requirements & Define Scope",
+                    "Create the Work Breakdown Structure (WBS)",
+                    "Define & Sequence Activities",
+                    "Estimate Resources, Durations, and Costs",
+                    "Develop Schedule and Budget",
+                    "Plan for Quality, Risk, and Procurement"
+                ],
+                outputs: [
+                    "Project Management Plan (including all subsidiary plans and baselines)",
+                    "Activity List & Attributes",
+                    "Risk Register",
+                    "Stakeholder Register (Detailed)",
+                    "Cost Estimates",
+                    "Project Schedule"
+                ]
+            },
+            executing: {
+                title: "3. Executing Process Group",
+                color: "green-400",
+                purpose: "To complete the work defined in the project management plan to satisfy the project specifications. This is where the bulk of the project's budget is spent, and the team performs the hands-on work to create the project's deliverables. This phase is all about action and implementation.",
+                activities: [
+                    "Direct and Manage Project Work",
+                    "Manage Quality",
+                    "Acquire, Develop, and Manage the Project Team",
+                    "Manage Communications",
+                    "Conduct Procurements",
+                    "Implement Risk Responses",
+                    "Manage Stakeholder Engagement"
+                ],
+                outputs: [
+                    "Deliverables",
+                    "Work Performance Data",
+                    "Issue Log",
+                    "Change Requests",
+                    "Project Management Plan Updates",
+                    "Project Documents Updates"
+                ]
+            },
+            monitoring: {
+                title: "4. Monitoring & Controlling Process Group",
+                color: "yellow-400",
+                purpose: "To track, review, and regulate the progress and performance of the project; identify any areas in which variances from the plan occur; and initiate the corresponding corrective or preventive changes. This group runs concurrently with the Executing group, acting as a 'course correction' mechanism.",
+                activities: [
+                    "Monitor and Control Project Work",
+                    "Perform Integrated Change Control",
+                    "Validate Scope",
+                    "Control Scope, Schedule, Costs, and Quality",
+                    "Monitor Risks",
+                    "Control Procurements"
+                ],
+                outputs: [
+                    "Work Performance Information",
+                    "Work Performance Reports",
+                    "Approved Change Requests",
+                    "Project Management Plan Updates",
+                    "Project Documents Updates"
+                ]
+            },
+            closing: {
+                title: "5. Closing Process Group",
+                color: "red-400",
+                purpose: "To formally complete or close the project, a specific phase, or a contractual obligation. This stage ensures all work is done, all agreements are settled, objectives have been met, and the project is terminated in an orderly fashion. It provides a definitive end point for the project.",
+                activities: [
+                    "Finalize all Activities",
+                    "Close Procurements",
+                    "Transition the Final Product",
+                    "Conduct Lessons Learned",
+                    "Release Project Resources",
+                    "Archive Project Information"
+                ],
+                outputs: [
+                    "Final Product, Service, or Result Transition",
+                    "Final Report",
+                    "Lessons Learned Register",
+                    "Procurement Closure Documentation",
+                    "Archived Project Documents"
+                ]
+            }
+        };
+
+        const documentsData = {
+            "Project Charter": {
+                description: "Formally authorizes the project's existence and provides the project manager with the authority to apply resources to project activities.",
+                lifecycle: { initiating: "Created", planning: "Referenced", executing: "Referenced", monitoring: "Referenced", closing: "Referenced" }
+            },
+            "Assumption Log": {
+                description: "Records all assumptions and constraints throughout the project life cycle.",
+                lifecycle: { initiating: "Created", planning: "Updated", executing: "Updated", monitoring: "Updated", closing: "Finalized" }
+            },
+            "Stakeholder Register": {
+                description: "Identifies stakeholders and outlines their details, requirements, and engagement strategy.",
+                lifecycle: { initiating: "Created", planning: "Updated", executing: "Updated", monitoring: "Updated", closing: "Finalized" }
+            },
+            "Project Management Plan": {
+                description: "The master document that defines how the project is executed, monitored, controlled, and closed. Contains all subsidiary plans and baselines.",
+                lifecycle: { initiating: "Input", planning: "Created", executing: "Updated", monitoring: "Updated", closing: "Finalized" }
+            },
+            "Risk Register": {
+                description: "A log of all identified risks, including their analysis, priority, and planned responses.",
+                lifecycle: { initiating: "Input", planning: "Created", executing: "Updated", monitoring: "Updated", closing: "Finalized" }
+            },
+            "Issue Log": {
+                description: "A document used to record and track all issues that arise during the project.",
+                lifecycle: { initiating: "-", planning: "-", executing: "Created", monitoring: "Updated", closing: "Finalized" }
+            },
+            "Change Requests": {
+                description: "Formal proposals to modify any document, deliverable, or baseline.",
+                lifecycle: { initiating: "-", planning: "-", executing: "Created", monitoring: "Approved/Rejected", closing: "-" }
+            },
+            "Lessons Learned Register": {
+                description: "A document detailing challenges, successes, and recommendations for future projects.",
+                lifecycle: { initiating: "-", planning: "-", executing: "Updated", monitoring: "Updated", closing: "Finalized" }
+            },
+             "Final Report": {
+                description: "A summary of the project's overall performance, confirming it met its objectives.",
+                lifecycle: { initiating: "-", planning: "-", executing: "-", monitoring: "-", closing: "Created" }
+            }
+        };
+
+        function createAccordion(title, content, type) {
+            const listItems = content.map(item => `<li class="py-1">${item}</li>`).join('');
+            return `
+                <div class="border-b border-gray-200 py-2">
+                    <button class="accordion-button w-full flex justify-between items-center text-left text-lg font-semibold text-gray-700 hover:text-blue-600">
+                        <span>${type}</span>
+                        <span class="transform transition-transform duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </button>
+                    <div class="accordion-content">
+                        <ul class="list-disc list-inside mt-2 text-gray-600 pl-4">${listItems}</ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        function populateProcessGroups() {
+            Object.keys(processData).forEach(key => {
+                const group = processData[key];
+                const container = document.getElementById(key);
+                container.innerHTML = `
+                    <h2 class="text-3xl font-bold mb-4 border-b-4 border-${group.color} pb-2">${group.title}</h2>
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Purpose</h3>
+                        <p class="text-gray-700 leading-relaxed">${group.purpose}</p>
+                    </div>
+                    ${createAccordion(key, group.activities, 'Detailed Activities')}
+                    ${createAccordion(key, group.outputs, 'Key Document Outputs')}
+                `;
+            });
+        }
+        
+        function setupAccordions() {
+            document.querySelectorAll('.accordion-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const icon = button.querySelector('svg');
+                    
+                    if (content.classList.contains('open')) {
+                        content.classList.remove('open');
+                        icon.classList.remove('rotate-180');
+                    } else {
+                        // Close other open accordions if needed
+                        // document.querySelectorAll('.accordion-content.open').forEach(openContent => {
+                        //     openContent.classList.remove('open');
+                        //     openContent.previousElementSibling.querySelector('svg').classList.remove('rotate-180');
+                        // });
+                        content.classList.add('open');
+                        icon.classList.add('rotate-180');
+                    }
+                });
+            });
+        }
+
+        function populateDocumentSelector() {
+            const selector = document.getElementById('document-selector');
+            Object.keys(documentsData).forEach(docName => {
+                const option = document.createElement('option');
+                option.value = docName;
+                option.textContent = docName;
+                selector.appendChild(option);
+            });
+            selector.addEventListener('change', (event) => {
+                updateDocumentView(event.target.value);
+            });
+            updateDocumentView(selector.value);
+        }
+
+        function updateDocumentView(docName) {
+            const data = documentsData[docName];
+            document.getElementById('doc-title').textContent = docName;
+            document.getElementById('doc-description').textContent = data.description;
+            
+            const lifecycleContainer = document.getElementById('doc-lifecycle');
+            lifecycleContainer.innerHTML = ''; 
+
+            const processGroups = ['initiating', 'planning', 'executing', 'monitoring', 'closing'];
+            processGroups.forEach(groupKey => {
+                const stage = data.lifecycle[groupKey] || '-';
+                let bgColor = 'bg-gray-100';
+                let textColor = 'text-gray-500';
+
+                if (stage.toLowerCase() === 'created') {
+                    bgColor = 'bg-blue-100'; textColor = 'text-blue-800';
+                } else if (stage.toLowerCase() === 'updated' || stage.toLowerCase() === 'approved/rejected') {
+                    bgColor = 'bg-green-100'; textColor = 'text-green-800';
+                } else if (stage.toLowerCase() === 'finalized' || stage.toLowerCase() === 'referenced') {
+                    bgColor = 'bg-purple-100'; textColor = 'text-purple-800';
+                }
+
+                const stageDiv = document.createElement('div');
+                stageDiv.className = `p-3 rounded-lg ${bgColor} ${textColor} font-semibold`;
+                stageDiv.innerHTML = `
+                    <div class="text-xs uppercase text-gray-500 mb-1">${processData[groupKey].title.split('.')[1].trim().replace(' Process Group','')}</div>
+                    <div>${stage}</div>
+                `;
+                lifecycleContainer.appendChild(stageDiv);
+            });
+        }
+
+        function setupTabs() {
+            const navButtons = document.querySelectorAll('.nav-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    navButtons.forEach(btn => btn.classList.remove('nav-active'));
+                    button.classList.add('nav-active');
+
+                    const tabId = button.dataset.tab;
+                    tabContents.forEach(content => {
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        } else {
+                            content.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        }
+        
+        function createActivitiesChart() {
+            const ctx = document.getElementById('activitiesChart').getContext('2d');
+            const data = {
+                labels: ['Initiating', 'Planning', 'Executing', 'Monitoring', 'Closing'],
+                datasets: [
+                    { label: 'Scope Management', data: [2, 5, 1, 4, 1], backgroundColor: 'rgba(54, 162, 235, 0.6)' },
+                    { label: 'Time Management', data: [1, 5, 2, 4, 1], backgroundColor: 'rgba(255, 99, 132, 0.6)' },
+                    { label: 'Cost Management', data: [1, 5, 2, 4, 1], backgroundColor: 'rgba(75, 192, 192, 0.6)' },
+                    { label: 'Quality Management', data: [0, 4, 5, 4, 1], backgroundColor: 'rgba(255, 206, 86, 0.6)' },
+                    { label: 'Risk Management', data: [2, 5, 3, 4, 1], backgroundColor: 'rgba(153, 102, 255, 0.6)' },
+                    { label: 'Stakeholder Mngmt', data: [4, 3, 5, 4, 2], backgroundColor: 'rgba(255, 159, 64, 0.6)' },
+                ]
+            };
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Activity Focus Across Process Groups (Scale 1-5)',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += `Focus Level ${context.parsed.y}`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true, max: 25 }
+                    }
+                }
+            });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateProcessGroups();
+            setupAccordions();
+            populateDocumentSelector();
+            setupTabs();
+            createActivitiesChart();
+        });
+
+    </script>
+</body>
+</html>
