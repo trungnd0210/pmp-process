@@ -1,482 +1,489 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Guide to PMI Process Groups</title>
+    <title>PMP Exam Study Guide - Ultra Detailed</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- 
-        Chosen Palette: Calm Harmony 
-        Application Structure Plan: A tab-based SPA design is used to present the PMI framework from multiple angles, enhancing user exploration and understanding. The default view is a "Process Group Flow," offering a visual, high-level overview. Users can switch to a "Document Explorer" to see the lifecycle of key project artifacts, or an "Activities View" to see where specific tasks fit into the overall process. This multi-faceted approach moves beyond the linear structure of the source report, allowing users to query the information based on their specific interests (e.g., "Where is the Risk Register used?") and to better synthesize the relationships between different components of the framework. This structure was chosen for its superior usability and its ability to turn a static report into an engaging learning tool.
-        Visualization & Content Choices: The main view uses an interactive HTML/CSS flowchart to visualize the 5 process groups, making the project lifecycle intuitive. (Goal: Inform/Organize, Method: Interactive HTML diagram, Interaction: Click to navigate). Detailed content for each group is organized into accordions to prevent information overload. (Goal: Inform, Method: HTML/JS Accordion, Interaction: Click to expand). The "Document Explorer" uses a dynamic HTML grid, updated with JS, to show the journey of each document across the process groups. (Goal: Organize/Relationships, Method: Dynamic HTML grid, Interaction: Dropdown selection). Key stats are highlighted in cards for quick takeaways. (Goal: Inform, Method: Styled HTML). This combination of interactive diagrams and dynamic content provides a richer, more engaging user experience than static text.
-        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. 
-    -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #F8F9FA;
-            color: #343A40;
+            scroll-behavior: smooth;
         }
-        .nav-active {
-            color: #3B82F6;
-            border-bottom-color: #3B82F6;
+        .content-section {
+            display: none;
         }
-        .process-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        .content-section.active {
+            display: block;
         }
-        .process-card:hover {
+        .sidebar-link.active {
+            background-color: #e0f2fe; /* light-blue-100 */
+            color: #0c4a6e; /*-blue-800 */
+            font-weight: 600;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
         }
         .accordion-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-in-out;
         }
-        .accordion-content.open {
-            max-height: 1500px;
+        .table-auto th, .table-auto td {
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            text-align: left;
         }
-        .tab-content {
-            display: none;
+        .table-auto th {
+            background-color: #f8fafc;
+            font-weight: 600;
         }
-        .tab-content.active {
-            display: block;
+        .table-auto tr:nth-child(even) {
+            background-color: #f1f5f9;
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 350px;
-            max-height: 400px;
+        h4 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
         }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 400px;
-            }
+        .key-term {
+            font-weight: 600;
+            color: #0369a1; /* sky-700 */
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-slate-50 text-slate-800">
 
-    <div class="container mx-auto p-4 md:p-8">
-        <header class="text-center mb-8 md:mb-12">
-            <h1 class="text-3xl md:text-5xl font-bold text-gray-900">An Interactive Guide to PMI Process Groups</h1>
-            <p class="text-lg text-gray-600 mt-2">Explore the complete project management lifecycle, from initiation to closing.</p>
-        </header>
-
-        <nav class="mb-8 bg-white rounded-lg shadow-sm p-2 flex justify-center space-x-2 md:space-x-8 border-b">
-            <button class="nav-button font-medium text-gray-600 hover:text-blue-500 py-2 px-4 border-b-2 border-transparent transition-colors duration-300 nav-active" data-tab="flow">Process Group Flow</button>
-            <button class="nav-button font-medium text-gray-600 hover:text-blue-500 py-2 px-4 border-b-2 border-transparent transition-colors duration-300" data-tab="documents">Document Explorer</button>
-            <button class="nav-button font-medium text-gray-600 hover:text-blue-500 py-2 px-4 border-b-2 border-transparent transition-colors duration-300" data-tab="activities">Key Activities</button>
-        </nav>
-
-        <main>
-            <!-- Tab 1: Process Group Flow -->
-            <div id="flow" class="tab-content active">
-                <section class="text-center mb-12 p-6 bg-white rounded-xl shadow-md">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">The Project Lifecycle at a Glance</h2>
-                    <p class="text-gray-600 max-w-3xl mx-auto">This is the standard PMI framework for managing a project. The five process groups guide the project from start to finish. While shown sequentially here for clarity, remember that Planning, Executing, and Monitoring & Controlling are iterative and often overlap. Click on any group to explore its details.</p>
-                </section>
-                
-                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-12">
-                    <a href="#initiating" class="process-card w-full md:w-1/6 bg-white p-4 rounded-lg shadow-md border-t-4 border-blue-400 text-center">
-                        <div class="text-xl font-bold">1. Initiating</div>
-                    </a>
-                    <div class="text-2xl text-gray-400 font-light hidden md:block">&rarr;</div>
-                    <a href="#planning" class="process-card w-full md:w-1/6 bg-white p-4 rounded-lg shadow-md border-t-4 border-purple-400 text-center">
-                        <div class="text-xl font-bold">2. Planning</div>
-                    </a>
-                    <div class="text-2xl text-gray-400 font-light hidden md:block">&rarr;</div>
-                    <a href="#executing" class="process-card w-full md:w-1/5 bg-white p-4 rounded-lg shadow-md border-t-4 border-green-400 text-center">
-                        <div class="text-xl font-bold">3. Executing</div>
-                    </a>
-                    <div class="text-2xl text-gray-400 font-light hidden md:block">&harr;</div>
-                     <a href="#monitoring" class="process-card w-full md:w-1/4 bg-white p-4 rounded-lg shadow-md border-t-4 border-yellow-400 text-center">
-                        <div class="text-xl font-bold">4. Monitoring & Controlling</div>
-                    </a>
-                    <div class="text-2xl text-gray-400 font-light hidden md:block">&rarr;</div>
-                     <a href="#closing" class="process-card w-full md:w-1/6 bg-white p-4 rounded-lg shadow-md border-t-4 border-red-400 text-center">
-                        <div class="text-xl font-bold">5. Closing</div>
-                    </a>
-                </div>
-
-                <!-- Process Group Details -->
-                <div class="space-y-8">
-                    <div id="initiating" class="bg-white p-6 rounded-xl shadow-lg scroll-mt-24"></div>
-                    <div id="planning" class="bg-white p-6 rounded-xl shadow-lg scroll-mt-24"></div>
-                    <div id="executing" class="bg-white p-6 rounded-xl shadow-lg scroll-mt-24"></div>
-                    <div id="monitoring" class="bg-white p-6 rounded-xl shadow-lg scroll-mt-24"></div>
-                    <div id="closing" class="bg-white p-6 rounded-xl shadow-lg scroll-mt-24"></div>
-                </div>
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white shadow-md flex-shrink-0">
+            <div class="p-6 border-b">
+                <h1 class="text-2xl font-bold text-sky-700 flex items-center">
+                    <i class="fas fa-graduation-cap mr-2"></i> PMP Guide
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Based on Rita Mulcahy's Prep</p>
             </div>
+            <nav class="mt-4 p-2">
+                <a href="#home" class="sidebar-link flex items-center py-3 px-4 text-slate-600 hover:bg-slate-100 transition duration-200 rounded-lg">
+                    <i class="fas fa-home w-6 mr-3"></i> Home
+                </a>
+                <a href="#foundations" class="sidebar-link flex items-center py-3 px-4 text-slate-600 hover:bg-slate-100 transition duration-200 rounded-lg">
+                    <i class="fas fa-building-columns w-6 mr-3"></i> Foundations
+                </a>
+                <a href="#domain-people" class="sidebar-link flex items-center py-3 px-4 text-slate-600 hover:bg-slate-100 transition duration-200 rounded-lg">
+                    <i class="fas fa-users w-6 mr-3"></i> Domain I: People
+                </a>
+                <a href="#domain-process" class="sidebar-link flex items-center py-3 px-4 text-slate-600 hover:bg-slate-100 transition duration-200 rounded-lg">
+                    <i class="fas fa-cogs w-6 mr-3"></i> Domain II: Process
+                </a>
+                <a href="#domain-business" class="sidebar-link flex items-center py-3 px-4 text-slate-600 hover:bg-slate-100 transition duration-200 rounded-lg">
+                    <i class="fas fa-briefcase w-6 mr-3"></i> Domain III: Business
+                </a>
+                <a href="#exam-tips" class="sidebar-link flex items-center py-3 px-4 text-slate-600 hover:bg-slate-100 transition duration-200 rounded-lg">
+                    <i class="fas fa-lightbulb w-6 mr-3"></i> Exam Tips & Tricks
+                </a>
+            </nav>
+        </aside>
 
-            <!-- Tab 2: Document Explorer -->
-            <div id="documents" class="tab-content">
-                <section class="text-center mb-12 p-6 bg-white rounded-xl shadow-md">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Project Document Lifecycle</h2>
-                    <p class="text-gray-600 max-w-3xl mx-auto">Project documents are critical artifacts that are created, updated, and finalized throughout the project. Select a document from the dropdown to see its journey across the five process groups and understand its purpose.</p>
-                </section>
-                <div class="flex flex-col md:flex-row gap-8">
-                    <div class="w-full md:w-1/3">
-                         <label for="document-selector" class="block text-sm font-medium text-gray-700 mb-2">Select a Document:</label>
-                        <select id="document-selector" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                        </select>
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+            <!-- Home Section -->
+            <section id="home" class="content-section active">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4">Welcome to Your PMP Study Hub</h2>
+                <p class="text-lg text-slate-600 mb-8">This comprehensive guide synthesizes key concepts from Rita Mulcahy's PMP® Exam Prep to help you master the material and pass the exam with confidence.</p>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card p-6">
+                        <i class="fas fa-users text-3xl text-sky-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Domain I: People (42%)</h3>
+                        <p class="text-slate-600">Master the soft skills essential for leading project teams effectively. Covers conflict management, team building, leadership styles, and stakeholder engagement.</p>
                     </div>
-                    <div class="w-full md:w-2/3 bg-white p-6 rounded-xl shadow-lg">
-                        <h3 id="doc-title" class="text-xl font-bold mb-2 text-blue-600">Project Charter</h3>
-                        <p id="doc-description" class="text-gray-700 mb-4"></p>
-                        <div id="doc-lifecycle" class="grid grid-cols-5 gap-2 text-center text-sm">
+                    <div class="card p-6">
+                        <i class="fas fa-cogs text-3xl text-sky-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Domain II: Process (50%)</h3>
+                        <p class="text-slate-600">Dive into the technical aspects of project management. Learn about the 10 Knowledge Areas, the 5 Process Groups, and both predictive and agile approaches.</p>
+                    </div>
+                    <div class="card p-6">
+                        <i class="fas fa-briefcase text-3xl text-sky-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Domain III: Business (8%)</h3>
+                        <p class="text-slate-600">Understand the connection between projects and organizational strategy, including benefits realization, value delivery, and compliance.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Foundations Section -->
+            <section id="foundations" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-6">Project Management Foundations</h2>
+                <div class="space-y-6">
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Projects, Programs, and Portfolios</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600 space-y-3">
+                            <div><span class="key-term">Project:</span> A temporary endeavor undertaken to create a unique product, service, or result. Projects drive change and enable business value creation. They have a definite beginning and end.</div>
+                            <div><span class="key-term">Program:</span> A group of related projects, subsidiary programs, and program activities managed in a coordinated way to obtain benefits not available from managing them individually. A project may or may not be part of a program. Focuses on achieving program benefits.</div>
+                            <div><span class="key-term">Portfolio:</span> A collection of projects, programs, subsidiary portfolios, and operations managed as a group to achieve strategic objectives. The components of a portfolio may not necessarily be interdependent or directly related. Focuses on maximizing the value of the portfolio and alignment with organizational strategy.</div>
+                        </div>
+                    </div>
+
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Organizational Structures & PM Authority</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600 overflow-x-auto">
+                             <table class="w-full text-left table-auto text-sm">
+                                <thead><tr><th>Structure</th><th>PM Authority</th><th>Resource Availability</th><th>Budget Control</th><th>Advantages</th><th>Disadvantages</th></tr></thead>
+                                <tbody>
+                                    <tr><td><strong>Functional</strong></td><td>Little to None</td><td>Little to None</td><td>Functional Manager</td><td>Clear career path; Centralized expertise.</td><td>PM has little power; Team prioritizes functional work.</td></tr>
+                                    <tr><td><strong>Weak Matrix</strong></td><td>Low</td><td>Low</td><td>Functional Manager</td><td>More project focus than functional.</td><td>Conflict between managers; Dual reporting.</td></tr>
+                                    <tr><td><strong>Balanced Matrix</strong></td><td>Low to Moderate</td><td>Low to Moderate</td><td>Mixed</td><td>Balances objectives; Better communication.</td><td>Dual reporting creates complexity; Power struggles.</td></tr>
+                                    <tr><td><strong>Strong Matrix</strong></td><td>Moderate to High</td><td>Moderate to High</td><td>Project Manager</td><td>Strong project focus; More control for PM.</td><td>Higher overhead; Potential for conflict.</td></tr>
+                                    <tr><td><strong>Project-Oriented</strong></td><td>High to Total</td><td>High to Total</td><td>Project Manager</td><td>Clear authority for PM; Team is loyal.</td><td>No "home" for team; Less efficient resource use.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>The Project Management Office (PMO)</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600 space-y-3">
+                            <p>A PMO is an organizational structure that standardizes the project-related governance processes and facilitates the sharing of resources, methodologies, tools, and techniques.</p>
+                            <div><span class="key-term">Supportive:</span> Provides a consultative role. Supplies templates, best practices, training, and lessons learned. It's a project repository. Has low control.</div>
+                            <div><span class="key-term">Controlling:</span> Provides support and requires compliance through various means. It adopts project management frameworks or methodologies, uses specific templates, forms, and tools, and conforms to governance frameworks. Has moderate control.</div>
+                            <div><span class="key-term">Directive:</span> Takes control of the projects by directly managing them. Project managers are assigned by and report to the PMO. Has high control.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Project Selection Methods</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600 space-y-3">
+                            <p>Organizations select projects that best align with their strategic goals. This is often done using economic models for project selection, which fall under the category of benefit measurement methods.</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Net Present Value (NPV):</strong> The present value of total benefits (income) minus the costs over many time periods. It accounts for the time value of money. <span class="key-term">Higher NPV is better.</span></li>
+                                <li><strong>Internal Rate of Return (IRR):</strong> The interest rate at which the project inflows (revenues) and project outflows (costs) are equal. It represents the "inherent discount rate" of the project. <span class="key-term">Higher IRR is better.</span></li>
+                                <li><strong>Payback Period:</strong> The length of time it takes for the organization to recover its investment in a project. It does not account for the time value of money or income beyond the payback period. <span class="key-term">Shorter payback period is generally better.</span></li>
+                                <li><strong>Benefit-Cost Ratio (BCR):</strong> Compares the financial benefits to the costs. A ratio > 1 means benefits are greater than costs. <span class="key-term">Higher BCR is better.</span></li>
+                                <li><strong>Opportunity Cost:</strong> The value of the project or opportunity that was not chosen. This is the benefit lost by selecting another alternative.</li>
+                                <li><strong>Sunk Costs:</strong> Expended costs. Sunk costs should not be considered when deciding whether to continue with a troubled project.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Tab 3: Key Activities -->
-            <div id="activities" class="tab-content">
-                 <section class="text-center mb-12 p-6 bg-white rounded-xl shadow-md">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Core Project Management Activities</h2>
-                    <p class="text-gray-600 max-w-3xl mx-auto">This chart visualizes where key project management activities are most prominent across the five process groups. While many activities span the entire lifecycle, this shows their primary focus. Use the filter to highlight specific activities.</p>
-                </section>
-                <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <div class="chart-container">
-                        <canvas id="activitiesChart"></canvas>
+            </section>
+
+            <!-- Domain I: People -->
+            <section id="domain-people" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-6">Domain I: People (42% of Exam)</h2>
+                <div class="space-y-6">
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Leadership Styles & Emotional Intelligence</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600 space-y-3">
+                            <p><span class="key-term">Servant Leader:</span> The primary focus is on understanding and addressing the needs and development of team members to enable the highest possible team performance. This is the preferred style for the PMP exam. A servant leader focuses on removing impediments, facilitating, and coaching.</p>
+                            <p><span class="key-term">Emotional Intelligence (EI):</span> The ability to identify, assess, and manage one's own emotions, the emotions of others, and of groups. Key components are:</p>
+                            <ul class="list-disc list-inside ml-4">
+                                <li><strong>Self-awareness:</strong> Understanding your own emotions and how they affect your performance.</li>
+                                <li><strong>Self-management:</strong> Controlling your emotions and impulses.</li>
+                                <li><strong>Social awareness:</strong> Perceiving and understanding the emotions of others (empathy).</li>
+                                <li><strong>Relationship management:</strong> Managing interactions successfully.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Conflict Management</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600 overflow-x-auto">
+                             <table class="w-full text-left table-auto text-sm">
+                                <thead><tr><th>Technique</th><th>Description</th><th>Outcome</th><th>When to Use</th></tr></thead>
+                                <tbody>
+                                    <tr><td><strong>Collaborate / Problem Solve</strong></td><td>Analyzing different perspectives; leads to consensus and commitment.</td><td>Win-Win</td><td>For complex issues vital to project success where finding a novel solution is key.</td></tr>
+                                    <tr><td><strong>Compromise / Reconcile</strong></td><td>Searching for solutions that bring some degree of satisfaction to all parties.</td><td>Lose-Lose</td><td>When parties have equal power or to achieve a temporary solution quickly.</td></tr>
+                                    <tr><td><strong>Smooth / Accommodate</strong></td><td>Emphasizing areas of agreement rather than differences; conceding one's position.</td><td>Yield-Lose</td><td>To maintain harmony, when you are wrong, or when the issue is more important to the other party.</td></tr>
+                                    <tr><td><strong>Force / Direct</strong></td><td>Pushing one's viewpoint at the expense of others; offering only win-lose solutions.</td><td>Win-Lose</td><td>In emergencies, on critical issues, or when unpopular actions need to be implemented.</td></tr>
+                                    <tr><td><strong>Withdraw / Avoid</strong></td><td>Postponing the issue to be better prepared or to be resolved by others.</td><td>Lose-Leave</td><td>When the issue is trivial, you have no power, or you need to cool down.</td></tr>
+                                </tbody>
+                            </table>
+                            <p class="mt-4"><strong>Top sources of conflict on projects:</strong> 1. Schedules, 2. Project priorities, 3. Resources, 4. Technical opinions.</p>
+                        </div>
+                    </div>
+                     <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Motivation Theories</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600 space-y-4">
+                            <div><span class="key-term">Maslow's Hierarchy of Needs:</span> People are motivated to fulfill a hierarchy of needs. A lower-level need must be satisfied before a higher-level need can emerge as a motivator. (Level 1: Physiological -> 2: Safety -> 3: Social -> 4: Esteem -> 5: Self-Actualization).</div>
+                            <div><span class="key-term">Herzberg's Two-Factor Theory:</span>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><strong>Hygiene Factors:</strong> e.g., salary, working conditions, job security. Their absence causes dissatisfaction, but their presence does not necessarily motivate. They are expected.</li>
+                                    <li><strong>Motivating Agents:</strong> e.g., achievement, recognition, responsibility, challenging work, growth. These are the factors that truly motivate people to perform better.</li>
+                                </ul>
+                            </div>
+                             <div><span class="key-term">McGregor's Theory X and Y:</span>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><strong>Theory X Manager:</strong> Believes employees are inherently lazy and must be micromanaged and controlled.</li>
+                                    <li><strong>Theory Y Manager:</strong> Believes employees are self-motivated, enjoy their work, and seek responsibility. PMI assumes a Theory Y approach is best.</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
+            <!-- Domain II: Process -->
+            <section id="domain-process" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-6">Domain II: Process (50% of Exam)</h2>
+                 <div class="space-y-6">
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>The 5 Process Groups & 10 Knowledge Areas</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600">
+                           <p>The PMP exam framework is built upon 5 Process Groups (the project lifecycle) and 10 Knowledge Areas (the subject areas of project management).</p>
+                           <h4>The 5 Process Groups:</h4>
+                           <ol class="list-decimal list-inside space-y-2">
+                               <li><strong>Initiating:</strong> Defines and authorizes the project or phase. Key outputs: Project Charter, Stakeholder Register.</li>
+                               <li><strong>Planning:</strong> Defines objectives and plans the course of action. Key output: Project Management Plan.</li>
+                               <li><strong>Executing:</strong> Performs the work defined in the plan. Key outputs: Deliverables, Work Performance Data.</li>
+                               <li><strong>Monitoring & Controlling:</strong> Tracks progress, compares it to the plan, and takes corrective action. Key outputs: Change Requests, Work Performance Reports.</li>
+                               <li><strong>Closing:</strong> Finalizes all activities to formally close the project or phase. Key outputs: Final Product Transition, Lessons Learned Register.</li>
+                           </ol>
+                           <h4 class="mt-4">The 10 Knowledge Areas:</h4>
+                           <p>Integration, Scope, Schedule, Cost, Quality, Resources, Communications, Risk, Procurement, and Stakeholder Management.</p>
+                        </div>
+                    </div>
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Key Integration Management Concepts</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600 space-y-3">
+                            <p>This is the PM's primary role: pulling all the pieces together.</p>
+                            <p><span class="key-term">Project Charter:</span> Formally authorizes the project and gives the PM authority to apply organizational resources. It includes high-level requirements, objectives, assumptions, and constraints.</p>
+                            <p><span class="key-term">Project Management Plan:</span> A comprehensive document that defines how the project is executed, monitored, controlled, and closed. It is a collection of all other management plans (scope, schedule, cost, etc.).</p>
+                            <p><span class="key-term">Perform Integrated Change Control:</span> The process of reviewing all change requests; approving changes and managing changes to deliverables, organizational process assets, project documents, and the project management plan; and communicating their disposition.</p>
+                        </div>
+                    </div>
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Key Scope & Schedule Concepts</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600 space-y-3">
+                            <p><span class="key-term">Work Breakdown Structure (WBS):</span> A deliverable-oriented hierarchical decomposition of the work to be executed by the project team. The lowest level is the work package. It represents 100% of the project scope.</p>
+                            <p><span class="key-term">Critical Path Method:</span> The sequence of scheduled activities that determines the duration of the project. It is the longest path through the network diagram and has the least amount of float, often zero.</p>
+                            <p><span class="key-term">Schedule Compression:</span>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><strong>Crashing:</strong> Adding resources to shorten the schedule duration for the least incremental cost. Always increases costs.</li>
+                                    <li><strong>Fast Tracking:</strong> Performing activities or phases in parallel that would normally be done in sequence. Always increases risk.</li>
+                                </ul>
+                            </p>
+                            <p><span class="key-term">Three-Point Estimating (PERT):</span> An estimating technique that uses a weighted average of three estimates: Optimistic (O), Pessimistic (P), and Most Likely (M). Formula: <strong>(O + 4M + P) / 6</strong>.</p>
+                        </div>
+                    </div>
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Earned Value Management (EVM)</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600">
+                           <p class="mb-2">EVM integrates scope, schedule, and cost performance. Key terms: PV (Planned Value), EV (Earned Value), AC (Actual Cost), BAC (Budget at Completion).</p>
+                           <table class="w-full text-left table-auto text-sm">
+                               <thead><tr><th>Metric</th><th>Formula</th><th>Interpretation</th></tr></thead>
+                               <tbody>
+                                   <tr><td>Cost Variance (CV)</td><td>EV - AC</td><td>Negative = Over Budget; Positive = Under Budget</td></tr>
+                                   <tr><td>Schedule Variance (SV)</td><td>EV - PV</td><td>Negative = Behind Schedule; Positive = Ahead of Schedule</td></tr>
+                                   <tr><td>Cost Performance Index (CPI)</td><td>EV / AC</td><td>&lt; 1 = Over Budget; &gt; 1 = Under Budget</td></tr>
+                                   <tr><td>Schedule Performance Index (SPI)</td><td>EV / PV</td><td>&lt; 1 = Behind Schedule; &gt; 1 = Ahead of Schedule</td></tr>
+                                   <tr><td>Estimate at Completion (EAC)</td><td>BAC / CPI</td><td>Forecast of total project cost (most common formula).</td></tr>
+                                   <tr><td>Estimate to Complete (ETC)</td><td>EAC - AC</td><td>How much more money is needed to finish.</td></tr>
+                               </tbody>
+                           </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Domain III: Business Environment -->
+            <section id="domain-business" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-6">Domain III: Business Environment (8% of Exam)</h2>
+                <div class="space-y-6">
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Project Compliance</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600">
+                            <p>Compliance involves conforming to rules, such as specifications, policies, standards, or laws. The project manager is responsible for identifying and adhering to all applicable compliance requirements.</p>
+                            <ul class="list-disc list-inside space-y-2 mt-2">
+                                <li><span class="key-term">Internal Compliance:</span> Adherence to the organization's own policies, procedures, and governance frameworks (e.g., PMO templates, HR policies, quality standards).</li>
+                                <li><span class="key-term">External Compliance:</span> Adherence to laws, regulations, and standards imposed by government, industry, or other external bodies (e.g., environmental regulations, safety standards, data privacy laws like GDPR).</li>
+                                <li>The project manager must confirm compliance requirements, classify them, analyze threats to compliance, and plan the necessary actions and resources to address them. This is part of risk management.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Project Benefits and Value Delivery</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600">
+                           <p>Value is the ultimate indicator of project success. The project manager must ensure the project delivers its intended business value and enables the benefits defined.</p>
+                           <ul class="list-disc list-inside space-y-2 mt-2">
+                                <li><span class="key-term">Business Case:</span> Justifies the project in terms of its value to the business. It links the project to the organization's strategic objectives and is a key input to the Project Charter.</li>
+                                <li><span class="key-term">Benefits Management Plan:</span> Outlines how and when the project's benefits will be delivered and measured. The PM ensures the project's outputs and outcomes can enable those benefits.</li>
+                                <li>This requires continuous monitoring of the project's alignment with business goals and stakeholder needs. If the business case is no longer valid, the PM has a responsibility to recommend project termination.</li>
+                           </ul>
+                        </div>
+                    </div>
+                     <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Supporting Organizational Change</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600">
+                           <p>Projects inherently create change within an organization. The project manager must understand and manage the impact of this change on the organization and its stakeholders to ensure the project's outcome is successfully adopted.</p>
+                           <ul class="list-disc list-inside space-y-2 mt-2">
+                                <li><strong>Assess the organization's culture and readiness for change:</strong> Understand how the organization will react to change.</li>
+                                <li><strong>Develop a change management strategy:</strong> Work with stakeholders to prepare them for the change. This might involve communication plans, training sessions, and addressing resistance.</li>
+                                <li><strong>Ensure a smooth transition:</strong> The project's deliverable must be successfully integrated into the organization's ongoing operations to realize its value. This is a key part of the Close Project or Phase process.</li>
+                           </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Exam Tips & Tricks Section -->
+            <section id="exam-tips" class="content-section">
+                <h2 class="text-4xl font-bold text-slate-800 mb-6">Exam Tips & Tricks</h2>
+                <div class="space-y-6">
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>Key "PMI-isms" to Internalize</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600">
+                            <p>The exam is based on PMI's ideal world of project management. Assume the following unless a question states otherwise:</p>
+                            <ul class="list-disc list-inside space-y-2 mt-2">
+                                <li>A formal project charter is always created and it authorizes the project manager.</li>
+                                <li>The project manager was assigned during initiating and participated in creating the charter.</li>
+                                <li>A comprehensive project management plan is created and approved before executing begins.</li>
+                                <li>Formal, integrated change control is always followed. Changes are not made on the fly.</li>
+                                <li>The project manager is proactive and addresses issues before they become problems. Risk management is performed.</li>
+                                <li>Lessons learned are documented throughout the project, not just at the end.</li>
+                                <li>The project manager has authority and should not escalate problems to the sponsor unless they are outside their control or require resources beyond their authority.</li>
+                                <li>The project manager should always act ethically and professionally.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card p-6 accordion">
+                        <button class="accordion-header w-full text-left text-xl font-semibold flex justify-between items-center">
+                            <span>How to Dissect Situational Questions</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </button>
+                        <div class="accordion-content mt-4 text-slate-600">
+                            <ul class="list-disc list-inside space-y-2 mt-2">
+                                <li><strong>Identify the actual question:</strong> It's often the last sentence. "What should the project manager do NEXT?" or "What should the project manager have done to prevent this?"</li>
+                                <li><strong>Assess the situation:</strong> Which process group are you in (Initiating, Planning, Executing, M&C, Closing)? Is it a predictive, agile, or hybrid environment? What is the core problem vs. the symptoms?</li>
+                                <li><strong>Think "Process First":</strong> Before taking action, what does the process say you should do? Often the answer is to review a plan, analyze the situation, or assess impacts.</li>
+                                <li><strong>Don't solve the problem, address it:</strong> The initial step is often to investigate, not to implement a solution. For example, if a stakeholder is unhappy, first meet with them to understand their concerns, don't immediately change the project.</li>
+                                <li><strong>Look for the "textbook" answer:</strong> Refer to the formal processes. If there's a scope issue, the answer might involve the change control process. If there's a conflict, it might involve a specific conflict resolution technique.</li>
+                                <li><strong>Eliminate bad choices:</strong> Rule out answers where the PM is passive ("wait and see"), escalates prematurely, acts unethically, or takes action without analysis.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
-    <script>
-        const processData = {
-            initiating: {
-                title: "1. Initiating Process Group",
-                color: "blue-400",
-                purpose: "To formally define a new project or a new phase of an existing project, establish its purpose and objectives, and obtain authorization to start. This stage is fundamentally about ensuring the project is aligned with the organization's strategic goals before significant resources are committed. It answers the crucial question, 'What is this project and why should we do it?' A well-executed initiation sets the stage for success by creating a shared understanding and a solid foundation.",
-                activities: [
-                    "Assess Project Feasibility",
-                    "Define High-Level Scope and Deliverables",
-                    "Identify Key Stakeholders",
-                    "Assign the Project Manager",
-                    "Establish High-Level Risks, Assumptions, and Constraints"
-                ],
-                outputs: [
-                    "Project Charter",
-                    "Assumption Log",
-                    "Stakeholder Register (Initial)"
-                ]
-            },
-            planning: {
-                title: "2. Planning Process Group",
-                color: "purple-400",
-                purpose: "To establish the total scope of the effort, define and refine the objectives, and develop the course of action required to attain those objectives. This is the most intensive process group, where the project manager and team create the detailed roadmap for the entire project. Effective planning is iterative and is the key to successfully navigating the project through to completion.",
-                activities: [
-                    "Develop the Project Management Plan",
-                    "Collect Requirements & Define Scope",
-                    "Create the Work Breakdown Structure (WBS)",
-                    "Define & Sequence Activities",
-                    "Estimate Resources, Durations, and Costs",
-                    "Develop Schedule and Budget",
-                    "Plan for Quality, Risk, and Procurement"
-                ],
-                outputs: [
-                    "Project Management Plan (including all subsidiary plans and baselines)",
-                    "Activity List & Attributes",
-                    "Risk Register",
-                    "Stakeholder Register (Detailed)",
-                    "Cost Estimates",
-                    "Project Schedule"
-                ]
-            },
-            executing: {
-                title: "3. Executing Process Group",
-                color: "green-400",
-                purpose: "To complete the work defined in the project management plan to satisfy the project specifications. This is where the bulk of the project's budget is spent, and the team performs the hands-on work to create the project's deliverables. This phase is all about action and implementation.",
-                activities: [
-                    "Direct and Manage Project Work",
-                    "Manage Quality",
-                    "Acquire, Develop, and Manage the Project Team",
-                    "Manage Communications",
-                    "Conduct Procurements",
-                    "Implement Risk Responses",
-                    "Manage Stakeholder Engagement"
-                ],
-                outputs: [
-                    "Deliverables",
-                    "Work Performance Data",
-                    "Issue Log",
-                    "Change Requests",
-                    "Project Management Plan Updates",
-                    "Project Documents Updates"
-                ]
-            },
-            monitoring: {
-                title: "4. Monitoring & Controlling Process Group",
-                color: "yellow-400",
-                purpose: "To track, review, and regulate the progress and performance of the project; identify any areas in which variances from the plan occur; and initiate the corresponding corrective or preventive changes. This group runs concurrently with the Executing group, acting as a 'course correction' mechanism.",
-                activities: [
-                    "Monitor and Control Project Work",
-                    "Perform Integrated Change Control",
-                    "Validate Scope",
-                    "Control Scope, Schedule, Costs, and Quality",
-                    "Monitor Risks",
-                    "Control Procurements"
-                ],
-                outputs: [
-                    "Work Performance Information",
-                    "Work Performance Reports",
-                    "Approved Change Requests",
-                    "Project Management Plan Updates",
-                    "Project Documents Updates"
-                ]
-            },
-            closing: {
-                title: "5. Closing Process Group",
-                color: "red-400",
-                purpose: "To formally complete or close the project, a specific phase, or a contractual obligation. This stage ensures all work is done, all agreements are settled, objectives have been met, and the project is terminated in an orderly fashion. It provides a definitive end point for the project.",
-                activities: [
-                    "Finalize all Activities",
-                    "Close Procurements",
-                    "Transition the Final Product",
-                    "Conduct Lessons Learned",
-                    "Release Project Resources",
-                    "Archive Project Information"
-                ],
-                outputs: [
-                    "Final Product, Service, or Result Transition",
-                    "Final Report",
-                    "Lessons Learned Register",
-                    "Procurement Closure Documentation",
-                    "Archived Project Documents"
-                ]
-            }
-        };
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const links = document.querySelectorAll('.sidebar-link');
+    const sections = document.querySelectorAll('.content-section');
+    const accordions = document.querySelectorAll('.accordion');
 
-        const documentsData = {
-            "Project Charter": {
-                description: "Formally authorizes the project's existence and provides the project manager with the authority to apply resources to project activities.",
-                lifecycle: { initiating: "Created", planning: "Referenced", executing: "Referenced", monitoring: "Referenced", closing: "Referenced" }
-            },
-            "Assumption Log": {
-                description: "Records all assumptions and constraints throughout the project life cycle.",
-                lifecycle: { initiating: "Created", planning: "Updated", executing: "Updated", monitoring: "Updated", closing: "Finalized" }
-            },
-            "Stakeholder Register": {
-                description: "Identifies stakeholders and outlines their details, requirements, and engagement strategy.",
-                lifecycle: { initiating: "Created", planning: "Updated", executing: "Updated", monitoring: "Updated", closing: "Finalized" }
-            },
-            "Project Management Plan": {
-                description: "The master document that defines how the project is executed, monitored, controlled, and closed. Contains all subsidiary plans and baselines.",
-                lifecycle: { initiating: "Input", planning: "Created", executing: "Updated", monitoring: "Updated", closing: "Finalized" }
-            },
-            "Risk Register": {
-                description: "A log of all identified risks, including their analysis, priority, and planned responses.",
-                lifecycle: { initiating: "Input", planning: "Created", executing: "Updated", monitoring: "Updated", closing: "Finalized" }
-            },
-            "Issue Log": {
-                description: "A document used to record and track all issues that arise during the project.",
-                lifecycle: { initiating: "-", planning: "-", executing: "Created", monitoring: "Updated", closing: "Finalized" }
-            },
-            "Change Requests": {
-                description: "Formal proposals to modify any document, deliverable, or baseline.",
-                lifecycle: { initiating: "-", planning: "-", executing: "Created", monitoring: "Approved/Rejected", closing: "-" }
-            },
-            "Lessons Learned Register": {
-                description: "A document detailing challenges, successes, and recommendations for future projects.",
-                lifecycle: { initiating: "-", planning: "-", executing: "Updated", monitoring: "Updated", closing: "Finalized" }
-            },
-             "Final Report": {
-                description: "A summary of the project's overall performance, confirming it met its objectives.",
-                lifecycle: { initiating: "-", planning: "-", executing: "-", monitoring: "-", closing: "Created" }
-            }
-        };
-
-        function createAccordion(title, content, type) {
-            const listItems = content.map(item => `<li class="py-1">${item}</li>`).join('');
-            return `
-                <div class="border-b border-gray-200 py-2">
-                    <button class="accordion-button w-full flex justify-between items-center text-left text-lg font-semibold text-gray-700 hover:text-blue-600">
-                        <span>${type}</span>
-                        <span class="transform transition-transform duration-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </span>
-                    </button>
-                    <div class="accordion-content">
-                        <ul class="list-disc list-inside mt-2 text-gray-600 pl-4">${listItems}</ul>
-                    </div>
-                </div>
-            `;
-        }
-
-        function populateProcessGroups() {
-            Object.keys(processData).forEach(key => {
-                const group = processData[key];
-                const container = document.getElementById(key);
-                container.innerHTML = `
-                    <h2 class="text-3xl font-bold mb-4 border-b-4 border-${group.color} pb-2">${group.title}</h2>
-                    <div class="mb-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">Purpose</h3>
-                        <p class="text-gray-700 leading-relaxed">${group.purpose}</p>
-                    </div>
-                    ${createAccordion(key, group.activities, 'Detailed Activities')}
-                    ${createAccordion(key, group.outputs, 'Key Document Outputs')}
-                `;
-            });
-        }
-        
-        function setupAccordions() {
-            document.querySelectorAll('.accordion-button').forEach(button => {
-                button.addEventListener('click', () => {
-                    const content = button.nextElementSibling;
-                    const icon = button.querySelector('svg');
-                    
-                    if (content.classList.contains('open')) {
-                        content.classList.remove('open');
-                        icon.classList.remove('rotate-180');
-                    } else {
-                        // Close other open accordions if needed
-                        // document.querySelectorAll('.accordion-content.open').forEach(openContent => {
-                        //     openContent.classList.remove('open');
-                        //     openContent.previousElementSibling.querySelector('svg').classList.remove('rotate-180');
-                        // });
-                        content.classList.add('open');
-                        icon.classList.add('rotate-180');
-                    }
-                });
-            });
-        }
-
-        function populateDocumentSelector() {
-            const selector = document.getElementById('document-selector');
-            Object.keys(documentsData).forEach(docName => {
-                const option = document.createElement('option');
-                option.value = docName;
-                option.textContent = docName;
-                selector.appendChild(option);
-            });
-            selector.addEventListener('change', (event) => {
-                updateDocumentView(event.target.value);
-            });
-            updateDocumentView(selector.value);
-        }
-
-        function updateDocumentView(docName) {
-            const data = documentsData[docName];
-            document.getElementById('doc-title').textContent = docName;
-            document.getElementById('doc-description').textContent = data.description;
-            
-            const lifecycleContainer = document.getElementById('doc-lifecycle');
-            lifecycleContainer.innerHTML = ''; 
-
-            const processGroups = ['initiating', 'planning', 'executing', 'monitoring', 'closing'];
-            processGroups.forEach(groupKey => {
-                const stage = data.lifecycle[groupKey] || '-';
-                let bgColor = 'bg-gray-100';
-                let textColor = 'text-gray-500';
-
-                if (stage.toLowerCase() === 'created') {
-                    bgColor = 'bg-blue-100'; textColor = 'text-blue-800';
-                } else if (stage.toLowerCase() === 'updated' || stage.toLowerCase() === 'approved/rejected') {
-                    bgColor = 'bg-green-100'; textColor = 'text-green-800';
-                } else if (stage.toLowerCase() === 'finalized' || stage.toLowerCase() === 'referenced') {
-                    bgColor = 'bg-purple-100'; textColor = 'text-purple-800';
-                }
-
-                const stageDiv = document.createElement('div');
-                stageDiv.className = `p-3 rounded-lg ${bgColor} ${textColor} font-semibold`;
-                stageDiv.innerHTML = `
-                    <div class="text-xs uppercase text-gray-500 mb-1">${processData[groupKey].title.split('.')[1].trim().replace(' Process Group','')}</div>
-                    <div>${stage}</div>
-                `;
-                lifecycleContainer.appendChild(stageDiv);
-            });
-        }
-
-        function setupTabs() {
-            const navButtons = document.querySelectorAll('.nav-button');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            navButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    navButtons.forEach(btn => btn.classList.remove('nav-active'));
-                    button.classList.add('nav-active');
-
-                    const tabId = button.dataset.tab;
-                    tabContents.forEach(content => {
-                        if (content.id === tabId) {
-                            content.classList.add('active');
-                        } else {
-                            content.classList.remove('active');
-                        }
-                    });
-                });
-            });
-        }
-        
-        function createActivitiesChart() {
-            const ctx = document.getElementById('activitiesChart').getContext('2d');
-            const data = {
-                labels: ['Initiating', 'Planning', 'Executing', 'Monitoring', 'Closing'],
-                datasets: [
-                    { label: 'Scope Management', data: [2, 5, 1, 4, 1], backgroundColor: 'rgba(54, 162, 235, 0.6)' },
-                    { label: 'Time Management', data: [1, 5, 2, 4, 1], backgroundColor: 'rgba(255, 99, 132, 0.6)' },
-                    { label: 'Cost Management', data: [1, 5, 2, 4, 1], backgroundColor: 'rgba(75, 192, 192, 0.6)' },
-                    { label: 'Quality Management', data: [0, 4, 5, 4, 1], backgroundColor: 'rgba(255, 206, 86, 0.6)' },
-                    { label: 'Risk Management', data: [2, 5, 3, 4, 1], backgroundColor: 'rgba(153, 102, 255, 0.6)' },
-                    { label: 'Stakeholder Mngmt', data: [4, 3, 5, 4, 2], backgroundColor: 'rgba(255, 159, 64, 0.6)' },
-                ]
-            };
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: data,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Activity Focus Across Process Groups (Scale 1-5)',
-                            font: { size: 16 }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += `Focus Level ${context.parsed.y}`;
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: { stacked: true },
-                        y: { stacked: true, beginAtZero: true, max: 25 }
-                    }
-                }
-            });
-        }
-
-
-        document.addEventListener('DOMContentLoaded', () => {
-            populateProcessGroups();
-            setupAccordions();
-            populateDocumentSelector();
-            setupTabs();
-            createActivitiesChart();
+    function navigateTo(hash) {
+        links.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === hash);
         });
+        sections.forEach(section => {
+            section.classList.toggle('active', '#' + section.id === hash);
+        });
+    }
 
-    </script>
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const hash = this.getAttribute('href');
+            if (window.location.hash !== hash) {
+                history.pushState(null, null, hash);
+                navigateTo(hash);
+            }
+        });
+    });
+
+    window.addEventListener('popstate', function() {
+        const hash = window.location.hash || '#home';
+        navigateTo(hash);
+    });
+
+    // Initial load
+    navigateTo(window.location.hash || '#home');
+
+    accordions.forEach(accordion => {
+        const header = accordion.querySelector('.accordion-header');
+        const content = accordion.querySelector('.accordion-content');
+        const icon = header.querySelector('i');
+
+        header.addEventListener('click', () => {
+            const isExpanded = content.style.maxHeight;
+            
+            // Close all other accordions in the same section before opening a new one
+            const parentSection = accordion.closest('.content-section');
+            parentSection.querySelectorAll('.accordion .accordion-content').forEach(accContent => {
+                if(accContent !== content) {
+                    accContent.style.maxHeight = null;
+                    if (accContent.previousElementSibling.querySelector('i')) {
+                       accContent.previousElementSibling.querySelector('i').classList.remove('rotate-180');
+                    }
+                }
+            });
+
+            if (isExpanded) {
+                content.style.maxHeight = null;
+                if(icon) icon.classList.remove('rotate-180');
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                if(icon) icon.classList.add('rotate-180');
+            }
+        });
+    });
+});
+</script>
+
 </body>
 </html>
